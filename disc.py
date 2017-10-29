@@ -1,42 +1,59 @@
 import numpy as np
 from numpy import linalg as LA
+import pandas as pd
 
 ## Currently only performing linear discriminant analysis for 2 groups
 
 class disc:
 
-###########
-###########
+	###########
+	###########
 
 	# constructor for pooled variance
 	# A = X1, B = X2
 	# abar & bbar are respective mean vectors
 	# Sigma is the cov matrix (when assuming pooled) 
 	# all these objects are numpy type objects
-	def __init__(self, abar, bbar, Sigma1, 
+	def __init__(self, abar, bbar, Sigma1 = None, 
 		         A = None, B = None, Sigma2 = None):
-		
-		self.X1 = A
-		self.X2 = B
-		self.x1_b = abar
-		self.x2_b = bbar
+		# If init is supplied a df and group indx 
+		if Sigma1 is None:
+			# X1 data matrix
+			self.X1 = np.asmatrix(abar.loc[abar.iloc[:,bbar] == 1])
+			self.X1 = self.X1[:, :2]
+			# X2 data matrix
+			self.X2 = np.asmatrix(abar.loc[abar.iloc[:,bbar] == 2])
+			self.X2 = self.X2[:, :2]
+			# X1 mean vector, over the rows (colMeans())
+			self.x1_b = np.mean(self.X1, axis = 0)
+			# X2 mean vector, over the rows (colMeans())
+			self.x2_b = np.mean(self.X2, axis = 0)
+			# covariance of X1, p by p
+			self.S1 = np.cov(self.X1, rowvar = False)
+			# covariance of X2, q by q
+			self.S2 = np.cov(self.X2, rowvar = False)
+			# Pooled cov, using formula 6-21
+			n1 = self.X1.shape[0]	# sample size grp1
+			n2 = self.X2.shape[0]	# sample size grp2
+			self.Sp = ((n1-1)/(n1+n2-2)) * self.S1 + ((n2-1)/(n1+n2-2)) * self.S2
 
-		if Sigma2 is None:
-			self.Sp = Sigma1
 		else:
-			self.Sp1 = Sigma1
-			self.Sp2 = Sigma2
+			self.X1 = A
+			self.X2 = B
+			self.x1_b = abar
+			self.x2_b = bbar
+
+			if Sigma2 is None:
+				self.Sp = Sigma1
+			else:
+				self.Sp1 = Sigma1
+				self.Sp2 = Sigma2
 
 
-
-###########
 	
 	# should have functions that can get the objects we need
 	# from two data matricies
 
-###########
-###########
-	
 	# get the linear discriminant function,
 	# under assumption of pooled covariance
 	def getLinearDiscF(self):
@@ -73,9 +90,10 @@ class disc:
 
 		return ret
 
-	### Should have an overloaded versions which
-	### doesn't take one observation but rather the data
-	
-
-	## Helper function that creates the necessasry data matricies
-	def dataMat(self, A)
+	# access the model matricies
+	# allSigma = False gives only pooled
+	def getModMats(self, allSigma = True):
+		if allSigma == True:
+			return self.X1, self.X2, self.x1_b, self.x2_b, self.S1, self.S2, self.Sp
+		else:
+			return self.X1, self.X2, self.x1_b, self.x2_b, self.Sp
