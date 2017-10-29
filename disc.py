@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import linalg as LA
 import pandas as pd
+import math
 
 ## Currently only performing linear discriminant analysis for 2 groups
 
@@ -25,9 +26,11 @@ class disc:
 			self.X2 = np.asmatrix(abar.loc[abar.iloc[:,bbar] == 2])
 			self.X2 = self.X2[:, :2]
 			# X1 mean vector, over the rows (colMeans())
-			self.x1_b = np.mean(self.X1, axis = 0)
+			# returns a 1 x p matrix
+			self.x1_b = np.mean(self.X1, axis = 0).T
 			# X2 mean vector, over the rows (colMeans())
-			self.x2_b = np.mean(self.X2, axis = 0)
+			# returns a 1 x p matrix
+			self.x2_b = np.mean(self.X2, axis = 0).T
 			# covariance of X1, p by p
 			self.S1 = np.cov(self.X1, rowvar = False)
 			# covariance of X2, q by q
@@ -65,30 +68,36 @@ class disc:
 	# Function returns TRUE if the observations
 	# falls into the first population and
 	# FALSE otherwise
-	def getRule(self, x0, c1, c2, p1, p2):
+	# if no X0 is supplied, only give crit value
+	def getRule(self, c1, c2, p1, p2, x0 = None):
 		# ruling will differ depending on value of const
 		const = (c1/c2)*(p2/p1)
 		yhat = self.getLinearDiscF()
 
-	    # if the whole cost prior thing is 1 the ruling looks
-	    # a little different than for not 1
-		if const == 1:
-			m = (self.x1_b-self.x2_b).T * LA.inv(self.Sp) * (self.x1_b + self.x2_b)
-			obs = yhat * x0
-			# get the ruling (TRUE if 1, false otherwise)
-			if obs > m:
-				ret = True
-			elif obs < m:
-				ret = False
+		if x0 == None and const == 1:
+			return const
+		elif x0 == None and const != 1:
+			return math.log(const)
 		else:
-			m = math.log(const)
-			obs = yhat - 1/2 * yhat * (self.x1_b + self.x2_b)
-			if obs > m:
-				ret = True
+		    # if the whole cost prior thing is 1 the ruling looks
+		    # a little different than for not 1
+			if const == 1:
+				m = (self.x1_b-self.x2_b).T * LA.inv(self.Sp) * (self.x1_b + self.x2_b)
+				obs = yhat * x0
+				# get the ruling (TRUE if 1, false otherwise)
+				if obs > m:
+					ret = True
+				elif obs < m:
+					ret = False
 			else:
-				ret = False
+				m = math.log(const)
+				obs = yhat - 1/2 * yhat * (self.x1_b + self.x2_b)
+				if obs > m:
+					ret = True
+				else:
+					ret = False
 
-		return ret
+			return ret
 
 	# access the model matricies
 	# allSigma = False gives only pooled
