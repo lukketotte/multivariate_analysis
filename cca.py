@@ -93,3 +93,4 @@ class cca:
 		A = A[: , 0:a]
 		# return A
 		return np.trace(A)/np.trace(self.R11)
+

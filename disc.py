@@ -76,3 +76,6 @@ class disc:
 	### Should have an overloaded versions which
 	### doesn't take one observation but rather the data
 	
+
+	## Helper function that creates the necessasry data matricies
+	def dataMat(self, A)
