@@ -102,7 +102,7 @@ class disc:
 	# parameters as that function. 
 	# sampleGrp is the group for which to get
 	# the confusion matrix, defaults to pop 1
-	def getConfMat(self, c1 = 1, c2 = 1, 
+	def getDiscRes(self, c1 = 1, c2 = 1, 
 		           p1 = 1, p2 = 1):
 		# we need a'x0
 		# where x0 will be the data matrix
@@ -143,8 +143,11 @@ class disc:
 			else:
 				grp2[i, 1] = 2 # correctly classified
 				confMat[1,1] += 1
+		
+		# using the confMat to get the apparent error rate
+		APER = (confMat[0,1] + confMat[1,0])/(self.X1.shape[0] + self.X2.shape[0])
 
-		return grp1, grp2, confMat
+		return grp1, grp2, confMat, APER
 
 
 	# access the model matricies
