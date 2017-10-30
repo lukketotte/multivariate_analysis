@@ -15,10 +15,10 @@ class disc:
 	# abar & bbar are respective mean vectors
 	# Sigma is the cov matrix (when assuming pooled) 
 	# all these objects are numpy type objects
-	def __init__(self, abar, bbar, Sigma1 = None, 
-		         A = None, B = None, Sigma2 = None):
+	def __init__(self, abar, bbar, A = None, B = None,
+		Sigma1 = None, Sigma2 = None):
 		# If init is supplied a df and group indx 
-		if Sigma1 is None:
+		if A is None:
 			# X1 data matrix
 			self.X1 = np.asmatrix(abar.loc[abar.iloc[:,bbar] == 1])
 			self.X1 = self.X1[:, :2]
