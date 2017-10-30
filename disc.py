@@ -18,14 +18,14 @@ class disc:
 	# df: tell class whether you're working with
 	# a dataframe or not
 	def __init__(self, abar, bbar, A = None, B = None,
-		Sigma1 = None, Sigma2 = None, df = False):
+		Sigma1 = None, Sigma2 = None, df = False, group_lvl = (0,1)):
 		# If init is supplied a df and group indx 
 		if df is True:
 			# X1 data matrix
-			self.X1 = np.asmatrix(abar.loc[abar.iloc[:,bbar] == 1])
+			self.X1 = np.asmatrix(abar.loc[abar.iloc[:,bbar] == group_lvl[0]])
 			self.X1 = self.X1[:, :2]
 			# X2 data matrix
-			self.X2 = np.asmatrix(abar.loc[abar.iloc[:,bbar] == 2])
+			self.X2 = np.asmatrix(abar.loc[abar.iloc[:,bbar] == group_lvl[1]])
 			self.X2 = self.X2[:, :2]
 			# X1 mean vector, over the rows (colMeans())
 			# returns a 1 x p matrix
