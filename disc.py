@@ -21,22 +21,31 @@ class disc:
 		Sigma1 = None, Sigma2 = None, df = False, group_lvl = (0,1)):
 		# If init is supplied a df and group indx 
 		if df is True:
+			
 			# X1 data matrix
 			self.X1 = np.asmatrix(abar.loc[abar.iloc[:,bbar] == group_lvl[0]])
-			self.X1 = self.X1[:, :2]
+			# assuming that the last column contains the group
+			self.X1 = self.X1[:, :(self.X1.shape[1]-1)]
+			
 			# X2 data matrix
 			self.X2 = np.asmatrix(abar.loc[abar.iloc[:,bbar] == group_lvl[1]])
-			self.X2 = self.X2[:, :2]
+			# assuming that the last column contains the group
+			self.X2 = self.X2[:, :(self.X2.shape[1]-1)]
+			
 			# X1 mean vector, over the rows (colMeans())
 			# returns a 1 x p matrix
 			self.x1_b = np.mean(self.X1, axis = 0).T
+			
 			# X2 mean vector, over the rows (colMeans())
 			# returns a 1 x p matrix
 			self.x2_b = np.mean(self.X2, axis = 0).T
+			
 			# covariance of X1, p by p
 			self.S1 = np.cov(self.X1, rowvar = False)
+			
 			# covariance of X2, q by q
 			self.S2 = np.cov(self.X2, rowvar = False)
+			
 			# Pooled cov, using formula 6-21
 			n1 = self.X1.shape[0]	# sample size grp1
 			n2 = self.X2.shape[0]	# sample size grp2
@@ -54,10 +63,6 @@ class disc:
 				self.Sp1 = Sigma1
 				self.Sp2 = Sigma2
 
-
-	
-	# should have functions that can get the objects we need
-	# from two data matricies
 
 	# get the linear discriminant function,
 	# under assumption of pooled covariance
@@ -105,7 +110,7 @@ class disc:
 	# sampleGrp is the group for which to get
 	# the confusion matrix, defaults to pop 1
 	def getDiscRes(self, c1 = 1, c2 = 1, 
-		           p1 = 1, p2 = 1):
+		           p1 = 1, p2 = 1, group_lvl = (0,1)):
 		# we need a'x0
 		# where x0 will be the data matrix
 		ldf = self.getLinearDiscF()
@@ -130,20 +135,20 @@ class disc:
 		for i in range(self.X1.shape[0]):
 			grp1[i, 0] = obs1[i]
 			if obs1[i] > m:
-				grp1[i, 1] = 1 # correctly classified
+				grp1[i, 1] = group_lvl[0] # correctly classified
 				confMat[0, 0] += 1
 			else:
-				grp2[i, 1] = 2 # incorrectly classified
+				grp1[i, 1] = group_lvl[1] # incorrectly classified
 				confMat[0, 1] += 1
 
 		# go through X2 and make rulings
 		for i in range(self.X2.shape[0]):
 			grp2[i, 0] = obs2[i]
 			if obs2[i] > m:
-				grp2[i, 1] = 1 # incorrectly classified
+				grp2[i, 1] = group_lvl[0] # incorrectly classified
 				confMat[1,0] += 1
 			else:
-				grp2[i, 1] = 2 # correctly classified
+				grp2[i, 1] = group_lvl[1] # correctly classified
 				confMat[1,1] += 1
 		
 		# using the confMat to get the apparent error rate
