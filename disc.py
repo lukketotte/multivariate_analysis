@@ -15,10 +15,12 @@ class disc:
 	# abar & bbar are respective mean vectors
 	# Sigma is the cov matrix (when assuming pooled) 
 	# all these objects are numpy type objects
+	# df: tell class whether you're working with
+	# a dataframe or not
 	def __init__(self, abar, bbar, A = None, B = None,
-		Sigma1 = None, Sigma2 = None):
+		Sigma1 = None, Sigma2 = None, df = False):
 		# If init is supplied a df and group indx 
-		if A is None:
+		if df is True:
 			# X1 data matrix
 			self.X1 = np.asmatrix(abar.loc[abar.iloc[:,bbar] == 1])
 			self.X1 = self.X1[:, :2]
@@ -45,7 +47,7 @@ class disc:
 			self.X2 = B
 			self.x1_b = abar
 			self.x2_b = bbar
-
+			# we will use pooled cov
 			if Sigma2 is None:
 				self.Sp = Sigma1
 			else:
@@ -75,11 +77,11 @@ class disc:
 		const = (c1/c2)*(p2/p1)
 		yhat = self.getLinearDiscF()
 
-		if const == 1 and x0 == None:
+		if const == 1 and type(x0) is not np.matrix:
 			return (1/2) * ((self.x1_b-self.x2_b).T * LA.inv(self.Sp) * (self.x1_b + self.x2_b))
 		# if the whole cost prior thing is 1 the ruling looks
 		# a little different than for not 1
-		elif const == 1 and x0 != None:
+		elif const == 1 and type(x0) is np.matrix:
 			m = (self.x1_b-self.x2_b).T * LA.inv(self.Sp) * (self.x1_b + self.x2_b)
 			obs = yhat * x0
 			# get the ruling (TRUE if 1, false otherwise)
@@ -87,7 +89,7 @@ class disc:
 				ret = True
 			elif obs < m:
 				ret = False
-		elif const != 1 and x0 != None:
+		elif const != 1 and type(x0) is np.matrix:
 			return math.log(const)
 		else:
 			m = math.log(const)
@@ -96,7 +98,7 @@ class disc:
 				ret = True
 			else:
 				ret = False
-		return ret
+		return ret, obs
 
 	# uses the getRule function, taking the same 
 	# parameters as that function. 
